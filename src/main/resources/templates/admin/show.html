@@ -1,158 +1,736 @@
-<!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель администратора</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Основные стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Верхняя панель */
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .user-info {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Основной контейнер */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 68px);
+        }
+
+        /* Сайдбар */
+        .sidebar {
+            width: 220px;
+            background-color: #fff;
+            border-right: 1px solid #e1e5eb;
+            padding: 24px 0;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 14px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        .nav-item.active {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+            font-weight: 600;
+        }
+
+        /* Основной контент */
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        .page-title {
+            margin-bottom: 28px;
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 600;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* Табы */
+        .tabs-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+        }
+
+        .tab-btn {
+            padding: 16px 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #6c757d;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: #495057;
+            background-color: #f1f3f4;
+        }
+
+        .tab-btn.active {
+            color: #1976d2;
+            background-color: white;
+            border-bottom: 3px solid #1976d2;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 0;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Карточки */
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid #e9ecef;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            padding: 20px 28px;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-body {
+            padding: 28px;
+        }
+
+        /* Таблица */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .data-table thead {
+            background-color: #f8f9fa;
+        }
+
+        .data-table th {
+            padding: 18px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Кнопки */
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+            border: 1px solid #17a2b8;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #138496;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: 1px solid #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: 1px solid #28a745;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            border-color: #218838;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Формы */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background-color: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-control:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 15px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-select[multiple] {
+            height: 120px;
+            padding: 8px;
+        }
+
+        .form-select option {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        .form-select option:hover {
+            background-color: #e9ecef;
+        }
+
+        .form-select option:checked {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: 13px;
+            display: block;
+            margin-top: 6px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Модальные окна */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeInOverlay 0.3s ease;
+        }
+
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            animation: modalSlideIn 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+            line-height: 1;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+        }
+
+        .modal-body {
+            padding: 28px;
+        }
+
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background-color: #f8f9fa;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e1e5eb;
+                padding: 16px 0;
+            }
+
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 16px;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .nav-item.active {
+                border-left: none;
+                border-bottom: 3px solid #1976d2;
+            }
+
+            .content-area {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .tabs-header {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+                justify-content: center;
+                border-bottom: 1px solid #e9ecef;
+                border-left: 3px solid transparent;
+            }
+
+            .tab-btn.active {
+                border-left: 3px solid #1976d2;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .data-table {
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-sm {
+                width: 100%;
+            }
+
+            .modal-dialog {
+                max-width: 95%;
+            }
+        }
+
+        /* Иконки (используем символы Unicode) */
+        .icon {
+            font-size: 16px;
+        }
+
+        .icon-user::before { content: "👤"; }
+        .icon-edit::before { content: "✏️"; }
+        .icon-delete::before { content: "🗑️"; }
+        .icon-add::before { content: "➕"; }
+        .icon-save::before { content: "💾"; }
+        .icon-cancel::before { content: "✖️"; }
+        .icon-logout::before { content: "🚪"; }
+        .icon-admin::before { content: "🛡️"; }
+
+        /* Уведомления */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+        }
+    </style>
 </head>
-<body class="bg-light">
-
-<!--Верхняя панель-->
-<nav class="navbar navbar-dark bg-dark px-3">
-    <span class="navbar-text text-white">
-        Админ с именем:
-        <span th:text="${currentUsername}"></span>
-    </span>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn btn-outline-light btn-sm">Выйти</button>
+<body>
+<!-- Верхняя панель -->
+<header class="header">
+    <div class="user-info">
+        <span class="icon icon-admin"></span>
+        <span>Админ с именем: <strong th:text="${currentUsername}">Администратор</strong></span>
+    </div>
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit" class="btn logout-btn">
+            <span class="icon icon-logout"></span>
+            Выйти
+        </button>
     </form>
-</nav>
+</header>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Сайдбар -->
-        <aside class="col-2 bg-white border-end vh-100 p-3">
-            <div class="list-group">
-                <a class="list-group-item list-group-item-action active">Admin</a>
-                <a th:href="@{/user}" class="list-group-item list-group-item-action">User</a>
+<div class="main-container">
+    <!-- Сайдбар -->
+    <aside class="sidebar">
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <span class="icon icon-admin"></span>
+                <span>Admin</span>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/user}" class="nav-item" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                    <span class="icon icon-user"></span>
+                    <span>User</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
 
+    <!-- Основной контент -->
+    <main class="content-area">
+        <h1 class="page-title">Панель администратора</h1>
+
+        <!-- Уведомления -->
+        <div id="notification" class="alert" style="display: none;"></div>
+
+        <!-- Табы -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="usersTab">Таблица пользователей</button>
+                <button class="tab-btn" data-tab="createTab">Новый пользователь</button>
             </div>
-        </aside>
-
-        <!-- Основной контент -->
-        <main class="col-10 p-4">
-            <h2>Панель администратора</h2>
-
-            <!-- Табы -->
-            <ul class="nav nav-tabs mb-3">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#usersTab" data-bs-toggle="tab">Таблица пользователей</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#createTab" data-bs-toggle="tab">Новый пользователь</a>
-                </li>
-            </ul>
 
             <!-- Контент табов -->
-            <div class="tab-content">
-                <!-- Таблица пользователей -->
-                <div class="tab-pane fade show active" id="usersTab">
-                    <div class="card">
-                        <div class="card-header fw-bold">
-                            Все пользователи
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-striped align-middle">
+            <div class="tab-content active" id="usersTab">
+                <div class="card">
+                    <div class="card-header">
+                        <span>Все пользователи</span>
+                        <span class="badge" style="background: #e9ecef; color: #495057; padding: 6px 12px; border-radius: 20px; font-size: 14px;">
+                                <span th:text="${users.size()}">0</span> пользователей
+                            </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
                                 <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Имя пользователя</th>
                                     <th>Роль</th>
-                                    <th>Редактировать</th>
-                                    <th>Удалить</th>
+                                    <th>Действия</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr th:each="user : ${users}">
-                                    <td th:text="${user.id}"></td>
-                                    <td th:text="${user.username}"></td>
-                                    <td th:text="${#strings.listJoin(user.roles.![name], ', ')}"></td>
+                                    <td th:text="${user.id}">1</td>
+                                    <td th:text="${user.username}">admin</td>
                                     <td>
-                                        <button class="btn btn-info btn-sm" data-bs-toggle="modal"
-                                                th:data-bs-target="'#editModal' + ${user.id}">Редактировать</button>
-
-                                        <!-- Модальное окно редактирования -->
-                                        <div class="modal fade" th:id="'editModal' + ${user.id}" tabindex="-1">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Редактировать пользователя</h5>
-                                                        <button class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form th:action="@{/admin/{id}(id=${user.id})}" method="post">
-                                                        <input type="hidden" name="_method" value="PATCH">
-                                                        <div class="modal-body">
-                                                            <div class="mb-3">
-                                                                <label class="form-label">ID</label>
-                                                                <input type="text" class="form-control" th:value="${user.id}" readonly disabled>
-                                                            </div>
-
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Имя пользователя</label>
-                                                                <input type="text" class="form-control" name="username" th:value="${user.username}" required>
-                                                            </div>
-
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Пароль</label>
-                                                                <input type="password" class="form-control" name="password"
-                                                                       placeholder="Введите новый пароль">
-                                                                <small class="text-muted">Оставьте пустым, если не хотите менять пароль</small>
-                                                            </div>
-
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Роль</label>
-                                                                <select class="form-select" multiple size="2" name="roleIds">
-                                                                    <option value="2" th:selected="${#lists.contains(user.roles.![id], 2)}">ROLE_USER</option>
-                                                                    <option value="1" th:selected="${#lists.contains(user.roles.![id], 1)}">ROLE_ADMIN</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-primary">Сохранить</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                <span th:each="role, stat : ${user.roles}"
+                                                      th:text="${role.name}"
+                                                      style="display: inline-block; background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 4px; margin-right: 5px; font-size: 13px;">
+                                                    ROLE_ADMIN
+                                                </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                                th:data-bs-target="'#deleteModal' + ${user.id}">Удалить</button>
-
-                                        <!-- Модальное окно удаления -->
-                                        <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Удалить пользователя</h5>
-                                                        <button class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <form th:action="@{/admin/{id}(id=${user.id})}" method="post">
-                                                        <input type="hidden" name="_method" value="DELETE">
-                                                        <div class="modal-body">
-                                                            <div class="mb-2">
-                                                                <label class="form-label">ID</label>
-                                                                <input class="form-control" th:value="${user.id}" disabled>
-                                                            </div>
-                                                            <div class="mb-2">
-                                                                <label class="form-label">Username</label>
-                                                                <input class="form-control" th:value="${user.username}" disabled>
-                                                            </div>
-                                                            <div class="mb-2">
-                                                                <label class="form-label">Role</label>
-                                                                <input class="form-control" th:value="${#strings.listJoin(user.roles.![name], ', ')}" disabled>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-danger">Удалить</button>
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-info btn-sm btn-edit"
+                                                    th:data-user-id="${user.id}"
+                                                    th:data-username="${user.username}"
+                                                    th:data-roles="${#strings.listJoin(user.roles.![id], ',')}">
+                                                <span class="icon icon-edit"></span>
+                                                Редактировать
+                                            </button>
+                                            <button class="btn btn-danger btn-sm btn-delete"
+                                                    th:data-user-id="${user.id}"
+                                                    th:data-username="${user.username}">
+                                                <span class="icon icon-delete"></span>
+                                                Удалить
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -161,51 +739,293 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Создание пользователя -->
-                <div class="tab-pane fade" id="createTab">
-                    <div class="card">
-                        <div class="card-header fw-bold">
-                            Создание нового пользователя
-                        </div>
-                        <div class="card-body">
-                            <form th:action="@{/admin}" th:object="${newUser}" method="post">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Имя пользователя</label>
-                                    <input type="text" class="form-control" id="username" th:field="*{username}"
-                                           placeholder="Введите имя пользователя" required>
-                                    <div th:if="${#fields.hasErrors('username')}" class="text-danger">
-                                        <span th:errors="*{username}"></span>
-                                    </div>
+            <div class="tab-content" id="createTab">
+                <div class="card">
+                    <div class="card-header">
+                        <span>Создание нового пользователя</span>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin}" th:object="${newUser}" method="post" id="createUserForm">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Имя пользователя</label>
+                                <input type="text" class="form-control" id="username" th:field="*{username}"
+                                       placeholder="Введите имя пользователя" required>
+                                <div th:if="${#fields.hasErrors('username')}" class="error-message">
+                                    <span th:errors="*{username}"></span>
                                 </div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Пароль</label>
-                                    <input type="password" class="form-control" id="password" th:field="*{password}"
-                                           placeholder="Введите пароль" required>
-                                    <div th:if="${#fields.hasErrors('password')}" class="text-danger">
-                                        <span th:errors="*{password}"></span>
-                                    </div>
+                            <div class="form-group">
+                                <label for="password" class="form-label">Пароль</label>
+                                <input type="password" class="form-control" id="password" th:field="*{password}"
+                                       placeholder="Введите пароль" required>
+                                <div th:if="${#fields.hasErrors('password')}" class="error-message">
+                                    <span th:errors="*{password}"></span>
                                 </div>
+                            </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Роль</label>
-                                    <select class="form-select" multiple size="2" name="roleIds">
-                                        <option value="2">ROLE_USER</option>
-                                        <option value="1">ROLE_ADMIN</option>
-                                    </select>
-                                </div>
+                            <div class="form-group">
+                                <label class="form-label">Роли</label>
+                                <select class="form-select" multiple size="2" name="roleIds" id="roleIds">
+                                    <option value="2">ROLE_USER</option>
+                                    <option value="1">ROLE_ADMIN</option>
+                                </select>
+                                <small class="form-text">Для выбора нескольких ролей удерживайте Ctrl (Cmd на Mac)</small>
+                            </div>
 
-                                <button type="submit" class="btn btn-primary">Создать пользователя</button>
-                            </form>
-                        </div>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="icon icon-add"></span>
+                                Создать пользователя
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </main>
+</div>
+
+<!-- Модальное окно редактирования пользователя -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Редактировать пользователя</h3>
+            <button class="modal-close" id="closeEditModal">&times;</button>
+        </div>
+        <form th:action="@{/admin/{id}}" method="post" id="editUserForm">
+            <input type="hidden" name="_method" value="PATCH">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">ID</label>
+                    <input type="text" class="form-control" id="editUserId" name="id" readonly disabled>
+                    <input type="hidden" id="editUserIdHidden" name="id">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Имя пользователя</label>
+                    <input type="text" class="form-control" id="editUsername" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-control" id="editPassword" name="password"
+                           placeholder="Введите новый пароль">
+                    <small class="form-text">Оставьте пустым, если не хотите менять пароль</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Роли</label>
+                    <select class="form-select" multiple size="2" name="roleIds" id="editRoleIds">
+                        <option value="2">ROLE_USER</option>
+                        <option value="1">ROLE_ADMIN</option>
+                    </select>
+                    <small class="form-text">Для выбора нескольких ролей удерживайте Ctrl (Cmd на Mac)</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">
+                    <span class="icon icon-save"></span>
+                    Сохранить
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelEditModal">
+                    <span class="icon icon-cancel"></span>
+                    Отмена
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Модальное окно удаления пользователя -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 class="modal-title">Удалить пользователя</h3>
+            <button class="modal-close" id="closeDeleteModal">&times;</button>
+        </div>
+        <form th:action="@{/admin/{id}}" method="post" id="deleteUserForm">
+            <input type="hidden" name="_method" value="DELETE">
+            <div class="modal-body">
+                <div class="form-group">
+                    <p style="margin-bottom: 20px; color: #721c24; font-weight: 500;">
+                        Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить.
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ID</label>
+                    <input type="text" class="form-control" id="deleteUserId" readonly disabled>
+                    <input type="hidden" id="deleteUserIdHidden" name="id">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Имя пользователя</label>
+                    <input type="text" class="form-control" id="deleteUsername" readonly disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">
+                    <span class="icon icon-delete"></span>
+                    Удалить
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelDeleteModal">
+                    <span class="icon icon-cancel"></span>
+                    Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Управление табами
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+
+                // Скрыть все табы
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Убрать активный класс у всех кнопок
+                tabBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Показать выбранный таб
+                document.getElementById(tabId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // Управление модальными окнами
+        const editModal = document.getElementById('editModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const closeDeleteModal = document.getElementById('closeDeleteModal');
+        const cancelEditModal = document.getElementById('cancelEditModal');
+        const cancelDeleteModal = document.getElementById('cancelDeleteModal');
+        const editBtns = document.querySelectorAll('.btn-edit');
+        const deleteBtns = document.querySelectorAll('.btn-delete');
+
+        // Открытие модального окна редактирования
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const username = this.getAttribute('data-username');
+                const roles = this.getAttribute('data-roles').split(',');
+
+                document.getElementById('editUserId').value = userId;
+                document.getElementById('editUserIdHidden').value = userId;
+                document.getElementById('editUsername').value = username;
+
+                // Очистить предыдущий выбор ролей
+                const roleSelect = document.getElementById('editRoleIds');
+                Array.from(roleSelect.options).forEach(option => {
+                    option.selected = false;
+                });
+
+                // Установить выбранные роли
+                roles.forEach(roleId => {
+                    const option = roleSelect.querySelector(`option[value="${roleId}"]`);
+                    if (option) {
+                        option.selected = true;
+                    }
+                });
+
+                // Обновить action формы
+                document.getElementById('editUserForm').action = `/admin/${userId}`;
+
+                editModal.classList.add('active');
+            });
+        });
+
+        // Открытие модального окна удаления
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                const username = this.getAttribute('data-username');
+
+                document.getElementById('deleteUserId').value = userId;
+                document.getElementById('deleteUserIdHidden').value = userId;
+                document.getElementById('deleteUsername').value = username;
+
+                // Обновить action формы
+                document.getElementById('deleteUserForm').action = `/admin/${userId}`;
+
+                deleteModal.classList.add('active');
+            });
+        });
+
+        // Закрытие модальных окон
+        function closeAllModals() {
+            editModal.classList.remove('active');
+            deleteModal.classList.remove('active');
+        }
+
+        closeEditModal.addEventListener('click', closeAllModals);
+        closeDeleteModal.addEventListener('click', closeAllModals);
+        cancelEditModal.addEventListener('click', closeAllModals);
+        cancelDeleteModal.addEventListener('click', closeAllModals);
+
+        // Закрытие по клику вне модального окна
+        editModal.addEventListener('click', function(e) {
+            if (e.target === editModal) {
+                closeAllModals();
+            }
+        });
+
+        deleteModal.addEventListener('click', function(e) {
+            if (e.target === deleteModal) {
+                closeAllModals();
+            }
+        });
+
+        // Показать уведомление при успешном действии
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `alert alert-${type} show`;
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Пример обработки успешного создания пользователя
+        const createForm = document.getElementById('createUserForm');
+        if (createForm) {
+            createForm.addEventListener('submit', function(e) {
+                // В реальном приложении здесь будет отправка формы
+                // showNotification('Пользователь успешно создан!', 'success');
+            });
+        }
+
+        // Пример обработки успешного редактирования
+        const editForm = document.getElementById('editUserForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                closeAllModals();
+                // showNotification('Пользователь успешно обновлен!', 'success');
+            });
+        }
+
+        // Пример обработки успешного удаления
+        const deleteForm = document.getElementById('deleteUserForm');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                closeAllModals();
+                // showNotification('Пользователь успешно удален!', 'success');
+            });
+        }
+    });
+</script>
 </body>
 </html>
